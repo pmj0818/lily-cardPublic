@@ -150,7 +150,6 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);co
   <!-- 탭 바 -->
   <div class="tab-bar">
     <button class="tab-btn on" onclick="showTab('search')">🔍 카드 검색</button>
-    <button class="tab-btn" onclick="showTab('mycards')">💳 내 카드</button>
     <button class="tab-btn" onclick="showTab('sim')">🧮 시뮬레이터</button>
   </div>
 </div>
@@ -198,26 +197,14 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);co
     </div>
   </div>
   <div class="page" id="search-body">
-    <div class="home-title">오늘의 추천</div>
-    <div class="tip-row" onclick="q('쿠팡')"><div class="tip-ico" style="background:#e8f0fe">🛍</div><div class="tip-info"><div class="tip-name">쿠팡 쇼핑</div><div class="tip-desc">쿠팡 와우카드 · 무실적</div></div><div class="tip-val" style="color:var(--blue)">4%</div></div>
-    <div class="tip-row" onclick="q('국세')"><div class="tip-ico" style="background:#f0fdf4">🏛</div><div class="tip-info"><div class="tip-name">국세 · 지방세 · 공과금</div><div class="tip-desc">신한 Air 1.5 · 실적+마일 모두 인정</div></div><div class="tip-val" style="color:var(--purple)">1.5마일</div></div>
-    <div class="tip-row" onclick="q('에버랜드')"><div class="tip-ico" style="background:#e6f9f0">🎡</div><div class="tip-info"><div class="tip-name">놀이공원 자유이용권</div><div class="tip-desc">쿠쿠 우리카드 · 에버랜드·롯데월드</div></div><div class="tip-val" style="color:var(--teal)">50%↓</div></div>
-    <div class="tip-row" onclick="q('올리브영')"><div class="tip-ico" style="background:#fff0f0">💄</div><div class="tip-info"><div class="tip-name">올리브영 · 투썸 · 뚜레쥬르</div><div class="tip-desc">The CJ KB국민카드 · 무실적 무한정</div></div><div class="tip-val" style="color:var(--red)">10%↓</div></div>
-    <div class="tip-row" onclick="q('해외결제')"><div class="tip-ico" style="background:#ede9fe">🌏</div><div class="tip-info"><div class="tip-name">해외 결제</div><div class="tip-desc">KB 아시아나 올림 · 무실적</div></div><div class="tip-val" style="color:var(--purple)">3마일</div></div>
-    <div class="tip-row" onclick="q('VIPS')"><div class="tip-ico" style="background:#fff0f0">🍽</div><div class="tip-info"><div class="tip-name">VIPS · 계절밥상 · 제일제면소</div><div class="tip-desc">The CJ KB국민카드 · 무실적</div></div><div class="tip-val" style="color:var(--red)">20%↓</div></div>
-  </div>
-</div>
-
-
-<!-- ══ 내 카드 탭 ══ -->
-<div id="tab-mycards" class="hidden">
-  <div class="page" id="my-card-list-wrap" style="padding-top:14px;">
-    <div style="font-size:11px;font-weight:600;color:var(--sub);letter-spacing:.5px;text-transform:uppercase;margin-bottom:12px;">
-      등록된 카드 <span id="card-count" style="color:var(--teal);">12장</span>
+    <div class="home-title" style="display:flex;align-items:center;justify-content:space-between;">
+      내 카드 <span id="card-count" style="font-size:12px;font-weight:600;color:var(--teal);">11장</span>
     </div>
     <div id="my-card-list"></div>
   </div>
 </div>
+
+<div id="tab-mycards" class="hidden"></div>
 
 <!-- ══ 시뮬레이터 탭 ══ -->
 <div id="tab-sim" class="hidden">
@@ -651,12 +638,10 @@ function runSim(){
 // ══ 탭 전환 ══════════════════════════════════════════════════════
 function showTab(name){
   document.getElementById('tab-search').classList.toggle('hidden', name!=='search');
-  document.getElementById('tab-mycards').classList.toggle('hidden', name!=='mycards');
   document.getElementById('tab-sim').classList.toggle('hidden', name!=='sim');
   document.querySelectorAll('.tab-btn').forEach((b,i)=>{
-    b.classList.toggle('on', (i===0&&name==='search')||(i===1&&name==='mycards')||(i===2&&name==='sim'));
+    b.classList.toggle('on', (i===0&&name==='search')||(i===1&&name==='sim'));
   });
-  if(name==='mycards') renderMyCards();
 }
 
 
@@ -720,12 +705,12 @@ function renderMyCards(){
 
   list.innerHTML = active.map(card=>`
     <div id="wrap_${card.id}" style="background:white;border-radius:16px;margin-bottom:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06);">
-      <div style="padding:13px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;" onclick="if(!event.target.closest('button'))openCard('${card.id}')">
+      <div style="padding:13px 16px;display:flex;align-items:center;gap:12px;">
         <div style="width:44px;height:44px;border-radius:12px;background:${card.color};display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">${card.emoji}</div>
         <div style="flex:1;min-width:0;">
           <div style="font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${card.name}</div>
           <div style="font-size:11px;color:var(--sub);margin-top:2px;">${card.issuer} · 연회비 ${card.fee===0?'무료':card.fee.toLocaleString()+'원'}</div>
-          <div id="bene_${card.id}" style="font-size:10px;color:var(--teal);margin-top:3px;font-weight:600;">혜택 보기 →</div>
+
         </div>
         <button onclick="event.stopPropagation();confirmToggle('${card.id}')"
           style="height:28px;padding:0 12px;border-radius:20px;flex-shrink:0;
@@ -767,12 +752,6 @@ function doToggle(id){
 }
 
 // Claude API 카드 검색 (웹서치 포함)
-async function openCard(id){
-  const card = MY_CARDS.find(c=>c.id===id);
-  if(!card) return;
-
-  // URL 이미 있으면 바로 이동
-  if(card.url){ window.location.href = card.url; return; }
 
   // URL 없으면 카드명으로 웹서치해서 URL 찾기
   const hint = document.getElementById('bene_'+id);
@@ -798,6 +777,7 @@ async function openCard(id){
     if(hint){hint.textContent='혜택 보기 →';hint.style.color='var(--teal)';}
   }
 }
+renderMyCards();
 </script>
 </body>
 </html>
