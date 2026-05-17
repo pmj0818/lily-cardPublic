@@ -121,10 +121,6 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);co
 .sim-empty{text-align:center;padding:32px;color:var(--sub);font-size:13px;}
 
 /* ── 힌트 바 ── */
-.hint-bar{position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:1px solid var(--border);padding:13px 20px 30px;display:flex;align-items:center;gap:12px;z-index:200;}
-.hint-text{flex:1;font-size:12px;color:var(--sub);line-height:1.6;}
-.hint-close{width:28px;height:28px;background:var(--bg);border:none;border-radius:50%;font-size:14px;color:var(--sub);cursor:pointer;display:flex;align-items:center;justify-content:center;}
-
 /* 로딩 */
 .spin-wrap{text-align:center;padding:40px;color:var(--sub);font-size:13px;}
 .spinner{width:28px;height:28px;border:2.5px solid var(--border);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;}
@@ -215,22 +211,6 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);co
 
 <!-- ══ 내 카드 탭 ══ -->
 <div id="tab-mycards" class="hidden">
-  <!-- 카드 추가 검색 -->
-  <div style="background:white;padding:12px 16px 14px;border-bottom:1px solid var(--border);">
-    <div style="font-size:11px;font-weight:600;color:var(--sub);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px;">카드 추가 검색</div>
-    <div style="display:flex;gap:8px;">
-      <input id="card-search-inp" type="search"
-        style="flex:1;background:var(--bg);border:none;border-radius:12px;padding:11px 16px;font-size:14px;font-family:'Noto Sans KR',sans-serif;color:var(--text);outline:none;-webkit-appearance:none;"
-        placeholder="카드명 입력 (예: 신한 Air, KB 올림)"
-        autocomplete="off" autocorrect="off" autocapitalize="off">
-      <button onclick="searchCard()"
-        style="width:42px;height:42px;flex-shrink:0;background:var(--teal);border:none;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      </button>
-    </div>
-    <div id="card-search-result" style="margin-top:10px;"></div>
-  </div>
-
   <div class="page" id="my-card-list-wrap" style="padding-top:14px;">
     <div style="font-size:11px;font-weight:600;color:var(--sub);letter-spacing:.5px;text-transform:uppercase;margin-bottom:12px;">
       등록된 카드 <span id="card-count" style="color:var(--teal);">12장</span>
@@ -293,12 +273,7 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);co
   </div>
 </div>
 
-<!-- 힌트 -->
-<div class="hint-bar" id="hint">
-  <div style="font-size:22px">📲</div>
-  <div class="hint-text"><strong>홈 화면에 추가하면 앱처럼!</strong><br>파일 앱 → 열기 → 하단 □↑ → 홈 화면에 추가</div>
-  <button class="hint-close" onclick="document.getElementById('hint').style.display='none'">✕</button>
-</div>
+
 
 <script>
 // ══ 카드 데이터 ══════════════════════════════════════════════════
@@ -502,34 +477,8 @@ const CARDS = [
       if(where==='dept') return {type:'할인',rate:0.05,amt:Math.round(amt*0.05),note:'현대백화점 5% 할인쿠폰 · 무실적'};
       return null;
     }
-  },
-  {
-    id:'lotte_happy', name:'롯데 국민행복카드', issuer:'롯데카드 · 연회비 0원 (미사용)', fee:0, min:300000,
-    kws:['학원','학원비','병원','약국','롯데월드','키자니아','놀이공원','택시','버스','지하철'],
-    ben(q){
-      if(['학원','학원비'].some(k=>q.includes(k)))
-        return{val:'10% 할인',c:'#059669',note:'학원비 10% 청구할인',ok:'관리비 등으로 30만 실적 충족 시',warn:'학원비는 실적 제외'};
-      if(['병원','약국'].some(k=>q.includes(k)))
-        return{val:'5% 할인',c:'#059669',note:'병원·약국·산후조리원 5% 청구할인',ok:'30만 실적↑',warn:'정부지원금 제외'};
-      if(['롯데월드','키자니아','놀이공원'].some(k=>q.includes(k)))
-        return{val:'10% 할인',c:'#059669',note:'유원지·놀이시설 10% 청구할인',ok:'30만 실적↑',warn:null};
-      return{val:'10% 할인',c:'#059669',note:'택시·버스·지하철 10% 청구할인',ok:'30만 실적↑',warn:null};
-    },
-    rank(q){
-      if(['학원','학원비'].some(k=>q.includes(k)))return 3;
-      if(['병원','약국'].some(k=>q.includes(k)))return 3;
-      return 6;
-    },
-    calc(amt, where){
-      if(where==='hospital') return {type:'할인',rate:0.05,amt:Math.round(amt*0.05),note:'병원·약국 5% 청구할인 (30만 실적↑)'};
-      if(where==='academy') return {type:'할인',rate:0.10,amt:Math.min(Math.round(amt*0.10),10000),note:'학원비 10% 청구할인 · 최대 1만원 (30만 실적↑)'};
-      if(where==='park') return {type:'할인',rate:0.10,amt:Math.round(amt*0.10),note:'유원지·놀이시설 10% 청구할인 (30만 실적↑)'};
-      if(where==='taxi') return {type:'할인',rate:0.10,amt:Math.round(amt*0.10),note:'택시·버스·지하철 10% 청구할인 (30만 실적↑)'};
-      // 공과금·관리비·보험·국세는 실적 제외 → 혜택 없음
-      return null;
-    }
   }
-];
+  ];
 
 const MILE_VALUE = 15; // 마일당 현금 가치 (원)
 
@@ -744,11 +693,7 @@ const MY_CARDS = [
   {id:'hana_1q', name:'하나멤버스 1Q Living+', issuer:'하나카드', fee:10000,
    color:'#00b4b4', emoji:'📚', active:true,
    url:'https://www.hanacard.co.kr/OPP08000000N.web?pcd=HS2002001&mcd=HS2002',
-   benefits:['학원 20,000머니','교통+쇼핑 10,000머니','스타벅스 4,000원','SSM 1,000원']},
-  {id:'lotte_happy', name:'롯데 국민행복카드', issuer:'롯데카드', fee:0,
-   color:'#aaa', emoji:'🏥', active:false,
-   url:'https://www.lottecard.co.kr/app/LPCDCPCA_V100.lc',
-   benefits:['병원 5%','학원 10%','놀이공원 10%']},
+   benefits:['학원 20,000머니','교통+쇼핑 10,000머니','스타벅스 4,000원','SSM 1,000원']}
   {id:'kb_asiana', name:'KB아시아나 올림카드', issuer:'KB국민카드', fee:28000,
    color:'#2c2c2c', emoji:'🌏', active:true,
    url:'https://card.kbcard.com/SOU/DVIEW/MACDBMCQ11006?maincc_cd=6418',
@@ -780,7 +725,7 @@ function renderMyCards(){
         <div style="flex:1;min-width:0;">
           <div style="font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${card.name}</div>
           <div style="font-size:11px;color:var(--sub);margin-top:2px;">${card.issuer} · 연회비 ${card.fee===0?'무료':card.fee.toLocaleString()+'원'}</div>
-          <div style="font-size:10px;color:var(--teal);margin-top:3px;font-weight:600;">혜택 보기 →</div>
+          <div id="bene_${card.id}" style="font-size:10px;color:var(--teal);margin-top:3px;font-weight:600;">혜택 보기 →</div>
         </div>
         <button onclick="event.stopPropagation();confirmToggle('${card.id}')"
           style="height:28px;padding:0 12px;border-radius:20px;flex-shrink:0;
@@ -822,77 +767,37 @@ function doToggle(id){
 }
 
 // Claude API 카드 검색 (웹서치 포함)
-async function searchCard(){
-  const q = document.getElementById('card-search-inp').value.trim();
-  if(!q) return;
-  const box = document.getElementById('card-search-result');
-  box.innerHTML = '<div class="spin-wrap"><div class="spinner"></div>카드 정보 검색 중...</div>';
-  try {
+async function openCard(id){
+  const card = MY_CARDS.find(c=>c.id===id);
+  if(!card) return;
+
+  // URL 이미 있으면 바로 이동
+  if(card.url){ window.location.href = card.url; return; }
+
+  // URL 없으면 카드명으로 웹서치해서 URL 찾기
+  const hint = document.getElementById('bene_'+id);
+  if(hint){ hint.textContent='🔍 검색 중...'; hint.style.color='#aaa'; }
+
+  try{
     const res = await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        model:'claude-sonnet-4-20250514', max_tokens:800,
-        tools:[{type:'web_search_20250305', name:'web_search'}],
-        system:`당신은 한국 신용카드 전문가입니다.
-카드명을 부분 입력해도 정확히 찾아주세요. 예시:
-- "대한항공 060" → 현대카드 대한항공 에디션2 (the Red 060)
-- "대한항공 030" → SC제일은행 대한항공카드 030  
-- "KB 올림" → KB국민 아시아나 올림카드
-- "신한 Air" → 아시아나 신한카드 Air 1.5
-웹서치로 공식 정보를 확인하고 아래 JSON만 출력, 다른 텍스트 없이:
-{"name":"정확한 카드 풀네임","issuer":"카드사명","fee":연회비숫자,"color":"카드대표색헥스","emoji":"관련이모지1개","benefits":["핵심혜택1","핵심혜택2","핵심혜택3"],"url":"카드사공식혜택페이지URL","summary":"한줄요약20자이내"}`,
-        messages:[{role:'user',content:`"${q}" 카드를 웹서치해서 정확한 카드명, 카드사, 연회비, 주요혜택, 공식 URL을 찾아줘`}]
+        model:'claude-sonnet-4-20250514', max_tokens:200,
+        tools:[{type:'web_search_20250305',name:'web_search'}],
+        system:'한국 신용카드 카드사 공식 혜택/상품 페이지 URL만 찾아서 JSON으로만 출력: {"url":"https://..."}',
+        messages:[{role:'user',content:`"${card.name}" 카드사 공식 혜택 페이지 URL`}]
       })
     });
     const data = await res.json();
-    const text = (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
-    const m = text.match(/\{[\s\S]*?\}/);
-    if(!m) throw new Error('파싱실패');
-    const info = JSON.parse(m[0]);
-    const already = MY_CARDS.find(c=>c.name===info.name||c.name.includes(info.name.slice(0,6)));
-    box.innerHTML = `
-    <div style="border:1.5px solid #b2f0e8;border-radius:12px;padding:14px;background:#e6f9f6;">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
-        <div style="width:44px;height:44px;border-radius:12px;background:${info.color||'#64748b'};display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">${info.emoji||'💳'}</div>
-        <div>
-          <div style="font-size:14px;font-weight:700;color:var(--text);">${info.name}</div>
-          <div style="font-size:11px;color:var(--sub);margin-top:2px;">${info.issuer} · 연회비 ${info.fee===0?'무료':(info.fee||0).toLocaleString()+'원'}</div>
-        </div>
-      </div>
-      <div style="font-size:11px;color:#444;line-height:1.6;margin-bottom:10px;">${info.summary||''}</div>
-      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;">
-        ${(info.benefits||[]).map(b=>`<span style="background:white;border:1px solid #b2f0e8;border-radius:6px;padding:3px 8px;font-size:10px;font-weight:600;color:#00897b;">${b}</span>`).join('')}
-      </div>
-      ${already
-        ? '<div style="text-align:center;padding:8px;font-size:12px;color:var(--sub);font-weight:600;">이미 등록된 카드예요 ✅</div>'
-        : '<button onclick="addCard(' + JSON.stringify(info).replace(/"/g,"'") + ')" style="width:100%;height:42px;background:var(--teal);border:none;border-radius:10px;font-size:14px;font-weight:700;color:white;cursor:pointer;font-family:Noto Sans KR,sans-serif;">+ 내 카드에 추가</button>'
-      }
-    </div>`;
-  } catch(e){
-    box.innerHTML = '<div style="text-align:center;padding:14px;font-size:12px;color:#e53935;font-weight:600;">검색 실패 · 더 구체적으로 입력해보세요<br><span style=\"font-size:11px;color:var(--sub);font-weight:400;\">예: 현대카드 대한항공 060, KB 아시아나 올림</span></div>';
+    const text=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    const m=text.match(/"url"\s*:\s*"(https?:\/\/[^"]+)"/);
+    if(m&&m[1]){ card.url=m[1]; window.location.href=card.url; }
+    else{ if(hint){hint.textContent='혜택 보기 →';hint.style.color='var(--teal)';} }
+  }catch(e){
+    if(hint){hint.textContent='혜택 보기 →';hint.style.color='var(--teal)';}
   }
 }
-
-function openCard(id){
-  const card = MY_CARDS.find(c=>c.id===id);
-  if(card && card.url) window.location.href = card.url;
-}
-
-function addCard(info){
-  MY_CARDS.push({id:'custom_'+Date.now(), name:info.name, issuer:info.issuer,
-    fee:info.fee||0, color:info.color||'#64748b', emoji:info.emoji||'💳',
-    url:info.url||'', active:true, benefits:info.benefits||[]});
-  document.getElementById('card-search-inp').value='';
-  document.getElementById('card-search-result').innerHTML='';
-  renderMyCards();
-}
-
-document.getElementById('card-search-inp').addEventListener('keydown',e=>{
-  if(e.key==='Enter'){e.preventDefault();searchCard();}
-});
-
-if(window.navigator.standalone) document.getElementById('hint').style.display='none';
 </script>
 </body>
 </html>
