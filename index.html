@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="카드 어드바이저">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' rx='26' fill='url(%23g)'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2300bfa5'/%3E%3Cstop offset='1' stop-color='%232979ff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='18' y='38' width='84' height='52' rx='8' fill='white' opacity='0.95'/%3E%3Crect x='18' y='50' width='84' height='14' fill='white' opacity='0.3'/%3E%3Crect x='26' y='62' width='20' height='6' rx='3' fill='%2300bfa5'/%3E%3Crect x='52' y='62' width='14' height='6' rx='3' fill='%232979ff' opacity='0.5'/%3E%3Crect x='26' y='72' width='30' height='4' rx='2' fill='%23e2e8f0'/%3E%3Ccircle cx='82' cy='36' r='14' fill='%23ff9500'/%3E%3Cpath d='M76 36 L80 40 L88 32' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E">
+<title>Lily's 카드 어드바이저</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#f5f5f7;--white:#fff;--text:#1c1c1e;--sub:#8e8e93;--border:#e5e5ea;
+  --teal:#00bfa5;--blue:#2979ff;--purple:#7c3aed;--green:#34c759;--red:#e53935;
+  --orange:#ff9500;--radius:16px;
+}
+body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* ── 헤더 ── */
+.header{background:var(--white);padding:52px 20px 0;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
+.header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.header-title{font-size:22px;font-weight:700;letter-spacing:-.5px;}
+.header-sub{font-size:12px;color:var(--sub);margin-top:2px;}
+.header-icon{width:42px;height:42px;background:linear-gradient(135deg,var(--teal),var(--blue));border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:22px;}
+
+/* ── 탭 바 ── */
+.tab-bar{display:flex;border-top:1px solid var(--border);margin-top:4px;}
+.tab-btn{flex:1;padding:10px 0 11px;font-size:13px;font-weight:600;color:var(--sub);background:none;border:none;cursor:pointer;font-family:'Noto Sans KR',sans-serif;border-bottom:2.5px solid transparent;transition:all .15s;}
+.tab-btn.on{color:var(--teal);border-bottom-color:var(--teal);}
+
+/* ── 검색 ── */
+.search-area{background:var(--white);padding:12px 16px 14px;border-bottom:1px solid var(--border);}
+.search-box{display:flex;gap:8px;}
+.search-input{flex:1;background:var(--bg);border:none;border-radius:12px;padding:11px 16px;font-size:15px;font-family:'Noto Sans KR',sans-serif;color:var(--text);outline:none;-webkit-appearance:none;}
+.search-input::placeholder{color:var(--sub);}
+.search-input:focus{background:#ebebf0;}
+.search-btn{width:42px;height:42px;flex-shrink:0;background:var(--teal);border:none;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.search-btn:active{opacity:.75;}
+
+/* ── 태그 ── */
+.tag-wrap{background:var(--white);padding:10px 16px 13px;border-bottom:1px solid var(--border);}
+.tag-label{font-size:11px;font-weight:600;color:var(--sub);letter-spacing:.6px;text-transform:uppercase;margin-bottom:8px;}
+.tag-scroll{display:flex;gap:7px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px;scrollbar-width:none;}
+.tag-scroll::-webkit-scrollbar{display:none;}
+.qtag{flex-shrink:0;background:var(--bg);border:1.5px solid var(--border);border-radius:20px;padding:6px 13px;font-size:13px;font-weight:500;color:var(--text);cursor:pointer;white-space:nowrap;font-family:'Noto Sans KR',sans-serif;transition:all .15s;}
+.qtag:active,.qtag.on{background:var(--teal);border-color:var(--teal);color:white;}
+
+/* ── 결과 영역 ── */
+.page{padding:16px 16px 100px;}
+.result-head{font-size:11px;font-weight:600;color:var(--sub);letter-spacing:.5px;text-transform:uppercase;margin-bottom:12px;padding:0 2px;}
+
+/* ── 카드 결과 ── */
+.card-item{background:var(--white);border-radius:var(--radius);margin-bottom:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06);opacity:0;transform:translateY(6px);animation:up .22s ease forwards;}
+@keyframes up{to{opacity:1;transform:none;}}
+.card-item:nth-child(2){animation-delay:.05s}.card-item:nth-child(3){animation-delay:.1s}.card-item:nth-child(4){animation-delay:.15s}
+.card-item.best{border:2px solid var(--teal);}
+.card-top{display:flex;align-items:center;padding:14px 16px;gap:12px;}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:2px;}
+.d1{background:var(--teal);}.d2{background:var(--blue);}.d3{background:var(--sub);}.d4{background:var(--border);}
+.card-info{flex:1;min-width:0;}
+.card-name{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.card-sub{font-size:11px;color:var(--sub);margin-top:2px;}
+.ben-val{font-size:16px;font-weight:800;flex-shrink:0;}
+.card-body{border-top:1px solid var(--border);background:#fafafa;padding:10px 16px 12px;}
+.ben-note{font-size:12px;color:#444;line-height:1.7;}
+.ben-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px;}
+.btag{font-size:11px;font-weight:600;padding:3px 9px;border-radius:6px;}
+.bt-green{background:#e6f9f0;color:#059669;}.bt-red{background:#fff0f0;color:var(--red);}.bt-blue{background:#e8f0fe;color:var(--blue);}.bt-gray{background:var(--bg);color:var(--sub);}
+
+/* ── 홈 ── */
+.home-title{font-size:11px;font-weight:600;color:var(--sub);letter-spacing:.6px;text-transform:uppercase;margin-bottom:10px;padding:0 2px;}
+.tip-row{background:var(--white);border-radius:var(--radius);display:flex;align-items:center;padding:13px 16px;gap:13px;margin-bottom:9px;box-shadow:0 1px 3px rgba(0,0,0,.05);cursor:pointer;}
+.tip-row:active{opacity:.7;}
+.tip-ico{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.tip-info{flex:1;}
+.tip-name{font-size:13px;font-weight:700;}
+.tip-desc{font-size:11px;color:var(--sub);margin-top:2px;line-height:1.5;}
+.tip-val{font-size:15px;font-weight:800;flex-shrink:0;}
+
+/* ── 시뮬레이터 ── */
+.sim-card{background:var(--white);border-radius:var(--radius);padding:18px 16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.sim-title{font-size:14px;font-weight:700;margin-bottom:14px;color:var(--text);}
+.sim-label{font-size:12px;font-weight:600;color:var(--sub);margin-bottom:6px;}
+
+.amount-display{background:var(--bg);border-radius:12px;padding:14px 16px;text-align:center;margin-bottom:8px;cursor:pointer;}
+.amount-display-num{font-size:28px;font-weight:900;color:var(--text);letter-spacing:-1px;}
+.amount-display-unit{font-size:16px;font-weight:600;color:var(--sub);margin-left:4px;}
+.amount-input{position:absolute;opacity:0;width:1px;height:1px;}
+
+.preset-row{display:flex;gap:7px;margin-top:8px;flex-wrap:wrap;}
+.preset-btn{background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:6px 12px;font-size:12px;font-weight:600;color:var(--sub);cursor:pointer;font-family:'Noto Sans KR',sans-serif;}
+.preset-btn:active{background:var(--teal);border-color:var(--teal);color:white;}
+
+.where-select{width:100%;background:var(--bg);border:none;border-radius:12px;padding:12px 14px;font-size:14px;font-family:'Noto Sans KR',sans-serif;color:var(--text);outline:none;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;margin-top:6px;}
+
+.sim-run-btn{width:100%;background:var(--teal);border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;color:white;cursor:pointer;font-family:'Noto Sans KR',sans-serif;margin-top:14px;}
+.sim-run-btn:active{opacity:.8;}
+
+/* 시뮬레이터 결과 */
+.sim-result{background:var(--white);border-radius:var(--radius);overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.sim-result-title{font-size:11px;font-weight:600;color:var(--sub);letter-spacing:.5px;text-transform:uppercase;margin:0 0 10px;padding:0 2px;}
+
+.sim-row{display:flex;align-items:stretch;border-bottom:1px solid var(--border);}
+.sim-row:last-child{border-bottom:none;}
+.sim-row.best-row{background:#f0fdf8;}
+
+.sim-rank{width:36px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;border-right:1px solid var(--border);}
+.sim-info{flex:1;padding:12px 12px 12px 14px;}
+.sim-card-name{font-size:13px;font-weight:700;margin-bottom:8px;}
+
+.sim-metrics{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.sim-metric{background:var(--bg);border-radius:8px;padding:7px 10px;}
+.sim-metric-label{font-size:10px;color:var(--sub);font-weight:500;margin-bottom:2px;}
+.sim-metric-val{font-size:14px;font-weight:800;}
+
+.sim-metric.highlight{background:#e6f9f0;}
+.sim-metric.highlight .sim-metric-val{color:#059669;}
+
+.sim-empty{text-align:center;padding:32px;color:var(--sub);font-size:13px;}
+
+/* ── 힌트 바 ── */
+.hint-bar{position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:1px solid var(--border);padding:13px 20px 30px;display:flex;align-items:center;gap:12px;z-index:200;}
+.hint-text{flex:1;font-size:12px;color:var(--sub);line-height:1.6;}
+.hint-close{width:28px;height:28px;background:var(--bg);border:none;border-radius:50%;font-size:14px;color:var(--sub);cursor:pointer;display:flex;align-items:center;justify-content:center;}
+
+/* 로딩 */
+.spin-wrap{text-align:center;padding:40px;color:var(--sub);font-size:13px;}
+.spinner{width:28px;height:28px;border:2.5px solid var(--border);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.hidden{display:none!important;}
+</style>
+</head>
+<body>
+
+<!-- 헤더 -->
+<div class="header">
+  <div class="header-row">
+    <div>
+      <div class="header-title">카드 어드바이저</div>
+      <div class="header-sub">Lily님의 보유카드 · 12장</div>
+    </div>
+    <div class="header-icon">💳</div>
+  </div>
+  <!-- 탭 바 -->
+  <div class="tab-bar">
+    <button class="tab-btn on" onclick="showTab('search')">🔍 카드 검색</button>
+    <button class="tab-btn" onclick="showTab('mycards')">💳 내 카드</button>
+    <button class="tab-btn" onclick="showTab('sim')">🧮 시뮬레이터</button>
+  </div>
+</div>
+
+<!-- ══ 검색 탭 ══ -->
+<div id="tab-search">
+  <div class="search-area">
+    <div class="search-box">
+      <input class="search-input" id="inp" type="search"
+        placeholder="어디서 결제? (쿠팡, 학원, CGV…)"
+        autocomplete="off" autocorrect="off" autocapitalize="off">
+      <button class="search-btn" onclick="go()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round">
+          <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+  <div class="tag-wrap">
+    <div class="tag-label">빠른 검색</div>
+    <div class="tag-scroll">
+      <button class="qtag" onclick="q('쿠팡')">🛍 쿠팡</button>
+      <button class="qtag" onclick="q('국세')">🏛 국세</button>
+      <button class="qtag" onclick="q('학원비')">📚 학원</button>
+      <button class="qtag" onclick="q('해외결제')">✈️ 해외</button>
+      <button class="qtag" onclick="q('에버랜드')">🎡 놀이공원</button>
+      <button class="qtag" onclick="q('CGV 영화')">🎬 CGV</button>
+      <button class="qtag" onclick="q('올리브영')">💄 올리브영</button>
+      <button class="qtag" onclick="q('투썸플레이스')">☕ 투썸</button>
+      <button class="qtag" onclick="q('VIPS')">🍽 VIPS</button>
+      <button class="qtag" onclick="q('병원')">🏥 병원</button>
+      <button class="qtag" onclick="q('스타벅스')">🟢 스타벅스</button>
+      <button class="qtag" onclick="q('통신비')">📱 통신비</button>
+      <button class="qtag" onclick="q('마트')">🛒 마트</button>
+      <button class="qtag" onclick="q('롯데슈퍼')">🏪 롯데슈퍼</button>
+      <button class="qtag" onclick="q('보험료')">🔐 보험</button>
+      <button class="qtag" onclick="q('롯데월드')">🎠 롯데월드</button>
+      <button class="qtag" onclick="q('키자니아')">👧 키자니아</button>
+      <button class="qtag" onclick="q('면세점')">✨ 면세점</button>
+      <button class="qtag" onclick="q('현대백화점')">🏬 백화점</button>
+      <button class="qtag" onclick="q('공과금')">⚡ 공과금</button>
+      <button class="qtag" onclick="q('아파트관리비')">🏢 관리비</button>
+      <button class="qtag" onclick="q('보험료')">🔐 보험료</button>
+      <button class="qtag" onclick="q('택시')">🚕 택시</button>
+    </div>
+  </div>
+  <div class="page" id="search-body">
+    <div class="home-title">오늘의 추천</div>
+    <div class="tip-row" onclick="q('쿠팡')"><div class="tip-ico" style="background:#e8f0fe">🛍</div><div class="tip-info"><div class="tip-name">쿠팡 쇼핑</div><div class="tip-desc">쿠팡 와우카드 · 무실적</div></div><div class="tip-val" style="color:var(--blue)">4%</div></div>
+    <div class="tip-row" onclick="q('국세')"><div class="tip-ico" style="background:#f0fdf4">🏛</div><div class="tip-info"><div class="tip-name">국세 · 지방세 · 공과금</div><div class="tip-desc">신한 Air 1.5 · 실적+마일 모두 인정</div></div><div class="tip-val" style="color:var(--purple)">1.5마일</div></div>
+    <div class="tip-row" onclick="q('에버랜드')"><div class="tip-ico" style="background:#e6f9f0">🎡</div><div class="tip-info"><div class="tip-name">놀이공원 자유이용권</div><div class="tip-desc">쿠쿠 우리카드 · 에버랜드·롯데월드</div></div><div class="tip-val" style="color:var(--teal)">50%↓</div></div>
+    <div class="tip-row" onclick="q('올리브영')"><div class="tip-ico" style="background:#fff0f0">💄</div><div class="tip-info"><div class="tip-name">올리브영 · 투썸 · 뚜레쥬르</div><div class="tip-desc">The CJ KB국민카드 · 무실적 무한정</div></div><div class="tip-val" style="color:var(--red)">10%↓</div></div>
+    <div class="tip-row" onclick="q('해외결제')"><div class="tip-ico" style="background:#ede9fe">🌏</div><div class="tip-info"><div class="tip-name">해외 결제</div><div class="tip-desc">KB 아시아나 올림 · 무실적</div></div><div class="tip-val" style="color:var(--purple)">3마일</div></div>
+    <div class="tip-row" onclick="q('VIPS')"><div class="tip-ico" style="background:#fff0f0">🍽</div><div class="tip-info"><div class="tip-name">VIPS · 계절밥상 · 제일제면소</div><div class="tip-desc">The CJ KB국민카드 · 무실적</div></div><div class="tip-val" style="color:var(--red)">20%↓</div></div>
+  </div>
+</div>
+
+
+<!-- ══ 내 카드 탭 ══ -->
+<div id="tab-mycards" class="hidden">
+  <!-- 카드 추가 검색 -->
+  <div style="background:white;padding:12px 16px 14px;border-bottom:1px solid var(--border);">
+    <div style="font-size:11px;font-weight:600;color:var(--sub);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px;">카드 추가 검색</div>
+    <div style="display:flex;gap:8px;">
+      <input id="card-search-inp" type="search"
+        style="flex:1;background:var(--bg);border:none;border-radius:12px;padding:11px 16px;font-size:14px;font-family:'Noto Sans KR',sans-serif;color:var(--text);outline:none;-webkit-appearance:none;"
+        placeholder="카드명 입력 (예: 신한 Air, KB 올림)"
+        autocomplete="off" autocorrect="off" autocapitalize="off">
+      <button onclick="searchCard()"
+        style="width:42px;height:42px;flex-shrink:0;background:var(--teal);border:none;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
+    </div>
+    <div id="card-search-result" style="margin-top:10px;"></div>
+  </div>
+
+  <div class="page" id="my-card-list-wrap" style="padding-top:14px;">
+    <div style="font-size:11px;font-weight:600;color:var(--sub);letter-spacing:.5px;text-transform:uppercase;margin-bottom:12px;">
+      등록된 카드 <span id="card-count" style="color:var(--teal);">12장</span>
+    </div>
+    <div id="my-card-list"></div>
+  </div>
+</div>
+
+<!-- ══ 시뮬레이터 탭 ══ -->
+<div id="tab-sim" class="hidden">
+  <div class="page">
+
+    <!-- 입력 카드 -->
+    <div class="sim-card">
+      <div class="sim-title">💰 결제 금액 입력</div>
+      <div class="sim-label">결제 금액</div>
+      <div class="amount-display" onclick="document.getElementById('sim-amount').focus()">
+        <span class="amount-display-num" id="amt-display">0</span>
+        <span class="amount-display-unit">원</span>
+      </div>
+      <input class="amount-input" id="sim-amount" type="number" inputmode="numeric" oninput="updateDisplay()">
+      <div class="preset-row">
+        <button class="preset-btn" onclick="setAmt(10000)">1만</button>
+        <button class="preset-btn" onclick="setAmt(30000)">3만</button>
+        <button class="preset-btn" onclick="setAmt(50000)">5만</button>
+        <button class="preset-btn" onclick="setAmt(100000)">10만</button>
+        <button class="preset-btn" onclick="setAmt(200000)">20만</button>
+        <button class="preset-btn" onclick="setAmt(500000)">50만</button>
+      </div>
+
+      <div style="margin-top:14px;">
+        <div class="sim-label">결제 장소</div>
+        <select class="where-select" id="sim-where">
+          <option value="general">일반 가맹점</option>
+          <option value="hospital">병원 / 약국</option>
+          <option value="academy">학원 / 교육</option>
+          <option value="overseas">해외 결제</option>
+          <option value="tax">국세 / 지방세</option>
+          <option value="utility">공과금 / 관리비 (전기·가스·수도·아파트)</option>
+          <option value="insurance">보험료 (생명·실손·화재 등)</option>
+          <option value="coupang">쿠팡</option>
+          <option value="oliveyoung">올리브영</option>
+          <option value="twosome">투썸 / 뚜레쥬르</option>
+          <option value="vips">VIPS / CJ 레스토랑</option>
+          <option value="cgv">CGV 영화</option>
+          <option value="park">놀이공원 (에버랜드·롯데월드)</option>
+          <option value="taxi">택시 / 대중교통</option>
+          <option value="mart">마트 / 슈퍼 (롯데슈퍼·이마트에브리데이 포함)</option>
+          <option value="duty_free">면세점</option>
+          <option value="dept">현대백화점</option>
+          <option value="starbucks">스타벅스 / 커피빈</option>
+        </select>
+      </div>
+
+      <button class="sim-run-btn" onclick="runSim()">카드별 혜택 비교하기</button>
+    </div>
+
+    <!-- 결과 -->
+    <div id="sim-result-wrap"></div>
+  </div>
+</div>
+
+<!-- 힌트 -->
+<div class="hint-bar" id="hint">
+  <div style="font-size:22px">📲</div>
+  <div class="hint-text"><strong>홈 화면에 추가하면 앱처럼!</strong><br>파일 앱 → 열기 → 하단 □↑ → 홈 화면에 추가</div>
+  <button class="hint-close" onclick="document.getElementById('hint').style.display='none'">✕</button>
+</div>
+
+<script>
+// ══ 카드 데이터 ══════════════════════════════════════════════════
+const CARDS = [
+  {
+    id:'kb_cj', name:'The CJ KB국민카드', issuer:'KB국민카드 · 굴비 · 연회비 0원', fee:0, min:0,
+    kws:['올리브영','올리브','뷰티','화장품','투썸','투썸플레이스','커피','카페','뚜레쥬르','베이커리',
+         'cgv','영화','영화관','vips','계절밥상','제일제면소','한쿡','cj푸드빌','외식','cj온스타일','cj'],
+    ben(q){
+      if(['vips','계절밥상','제일제면소','cj푸드빌'].some(k=>q.includes(k)))
+        return{val:'20% 할인',c:'#e53935',note:'CJ푸드빌 레스토랑 20% 현장할인 + CJ적립금 2%',ok:'무실적·무한정 ✅',warn:null};
+      if(['cgv','영화','영화관'].some(k=>q.includes(k)))
+        return{val:'6,000원↓',c:'#e53935',note:'CGV 6,000원 할인 (3개월 월평균 30만↑) / 미달시 2,000원',ok:'연 12회',warn:'3개월 실적 30만↑'};
+      return{val:'10% 할인',c:'#e53935',note:'올리브영·투썸·뚜레쥬르 10% 현장할인',ok:'무실적·무한정 ✅',warn:null};
+    },
+    rank(q){
+      if(['올리브영','투썸','뚜레쥬르','vips','계절밥상','cgv','영화'].some(k=>q.includes(k)))return 1;
+      return 5;
+    },
+    // 시뮬레이터용 혜택 계산
+    calc(amt, where){
+      if(where==='oliveyoung'||where==='twosome') return {type:'할인',rate:0.10,amt:Math.round(amt*0.10),note:'10% 현장할인 · 무실적 무한정'};
+      if(where==='vips') return {type:'할인',rate:0.20,amt:Math.round(amt*0.20),note:'20% 현장할인 · CJ푸드빌'};
+      if(where==='cgv') return {type:'할인',rate:null,amt:6000,note:'6,000원 청구할인 (3개월 30만↑)'};
+      return null;
+    }
+  },
+  {
+    id:'shinhan', name:'아시아나 신한카드 Air 1.5', issuer:'신한카드 · 연회비 45,000원', fee:45000, min:500000,
+    kws:['국세','세금','부가세','종합소득세','법인세','지방세','재산세','자동차세',
+         '4대보험','건강보험','국민연금','고용보험','산재보험','보험료',
+         '전기','전기요금','도시가스','가스','수도','수도요금','관리비','아파트관리비','공과금',
+         '병원','약국','마트','식재료','일반결제','국내결제'],
+    ben(q){
+      if(['국세','세금','부가세','지방세','재산세','자동차세'].some(k=>q.includes(k)))
+        return{val:'1.5마일',c:'#7c3aed',note:'국세·지방세 실적 인정 + 1,000원당 1.5마일 ✅',ok:'세금납부 최적',warn:'전월 50만↑ 권장'};
+      if(['4대보험','건강보험','국민연금','고용보험','산재보험','보험료'].some(k=>q.includes(k)))
+        return{val:'1.5마일',c:'#7c3aed',note:'4대보험 실적 인정 + 1.5마일 ✅',ok:'공과금·보험 OK',warn:null};
+      if(['전기','도시가스','수도','관리비','공과금'].some(k=>q.includes(k)))
+        return{val:'1.5마일',c:'#7c3aed',note:'공과금 실적 인정 + 1.5마일 ✅',ok:'관리비·공과금 OK',warn:null};
+      return{val:'1.5마일',c:'#7c3aed',note:'국내 전 가맹점 1,000원당 1.5마일',ok:'국세·공과금·4대보험 실적 인정',warn:'전월 50만↑ 필요'};
+    },
+    rank(q){
+      const top=['국세','세금','지방세','4대보험','보험료','전기','도시가스','수도','관리비','공과금'];
+      return top.some(k=>q.includes(k))?1:3;
+    },
+    calc(amt, where){
+      const miles = Math.floor(amt/1000*1.5);
+      const cash = Math.round(miles*15);
+      const base = {type:'마일',rate:0.0015,rateLabel:'1.5마일/1,000원',miles,cash};
+      if(where==='tax') return {...base,note:'국세·지방세 실적 인정 + 1,000원당 1.5마일 ✅'};
+      if(where==='utility') return {...base,note:'공과금·관리비 실적 인정 + 1.5마일 ✅'};
+      if(where==='insurance') return {...base,note:'보험료 실적 인정 + 1,000원당 1.5마일 ✅'};
+      if(where==='hospital') return {...base,note:'병원 1,000원당 1.5마일'};
+      if(where==='general') return {...base,note:'국내 일반가맹점 1,000원당 1.5마일'};
+      if(where==='academy') return {...base,note:'학원비 1,000원당 1.5마일'};
+      if(where==='mart') return {...base,note:'마트 1,000원당 1.5마일'};
+      if(where==='taxi') return {...base,note:'택시·대중교통 1,000원당 1.5마일'};
+      if(where==='starbucks') return {...base,note:'카페 1,000원당 1.5마일'};
+      if(where==='overseas'){
+        const m2 = Math.floor(amt/1000*3);
+        return {type:'마일',rate:0.003,rateLabel:'3마일/1,000원',miles:m2,cash:Math.round(m2*15),note:'해외 더블적립 1,000원당 3마일 (50만↑)'};
+      }
+      return null;
+    }
+  },
+  {
+    id:'coupang', name:'쿠팡 와우카드', issuer:'KB국민카드 · 연회비 20,000원', fee:20000, min:0,
+    kws:['쿠팡','로켓배송','로켓프레시','쿠팡이츠','쇼핑','온라인쇼핑'],
+    ben(q){
+      if(['쿠팡','로켓배송','로켓프레시','쿠팡이츠'].some(k=>q.includes(k)))
+        return{val:'4% 적립',c:'#2979ff',note:'쿠팡 결제 4% 쿠팡캐시 · 무실적',ok:'월 한도 40,000원',warn:'쿠팡 결제에만 4%'};
+      return{val:'1.5% 적립',c:'#2979ff',note:'일반 가맹점 1.5% 적립 · 무실적',ok:'무실적 ✅',warn:'쿠팡 외 1.5%'};
+    },
+    rank:(q)=>q.includes('쿠팡')||q.includes('로켓')?1:5,
+    calc(amt, where){
+      if(where==='coupang'){
+        const cashback = Math.min(Math.round(amt*0.04), 40000);
+        return {type:'적립',rate:0.04,amt:cashback,note:'쿠팡 4% 쿠팡캐시 · 월 한도 4만원'};
+      }
+      if(where==='general'||where==='mart'||where==='hospital'||where==='taxi'||where==='starbucks'||where==='academy'||where==='insurance'){
+        const cashback = Math.round(amt*0.015);
+        return {type:'적립',rate:0.015,amt:cashback,note:'일반 가맹점 1.5% 적립 · 무실적'};
+      }
+      return null;
+    }
+  },
+  {
+    id:'hana', name:'하나멤버스 1Q Living+', issuer:'하나카드 · 연회비 10,000원', fee:10000, min:300000,
+    kws:['학원','학원비','교통','버스','지하철','택시','쇼핑','온라인쇼핑','스타벅스','커피빈','카페','커피','ssm','이마트에브리데이','롯데슈퍼','마트','슈퍼'],
+    ben(q){
+      if(['학원','학원비'].some(k=>q.includes(k)))
+        return{val:'20,000머니',c:'#0891b2',note:'학원비 40만 결제 시 리빙적립 20,000머니 (30만 구간)',ok:'학원 40만 추천',warn:'학원비는 실적 제외'};
+      if(['택시','버스','지하철','교통'].some(k=>q.includes(k)))
+        return{val:'5,000머니',c:'#0891b2',note:'통신/교통 10만↑ 플러스적립 5,000머니 (택시 포함)',ok:'실적 인정 ✅',warn:'30만 실적·10만 이용 필요'};
+      if(['스타벅스','커피빈','카페','커피'].some(k=>q.includes(k)))
+        return{val:'4,000원↓',c:'#0891b2',note:'스타벅스·커피빈 4,000원↑ 결제 시 4,000원 청구할인',ok:'월 최대 4,000원',warn:'30만 실적 필요'};
+      return{val:'5,000머니',c:'#0891b2',note:'온라인쇼핑 10만↑ 플러스적립 5,000머니',ok:'실적 인정 ✅',warn:'30만 실적 필요'};
+    },
+    rank(q){
+      if(['학원','학원비'].some(k=>q.includes(k)))return 2;
+      if(['택시','버스','지하철','교통'].some(k=>q.includes(k)))return 2;
+      if(['스타벅스','커피빈','카페','커피'].some(k=>q.includes(k)))return 3;
+      return 4;
+    },
+    calc(amt, where){
+      if(where==='starbucks') return {type:'할인',rate:null,amt:4000,note:'스타벅스·커피빈 4,000원 청구할인 (30만 실적↑)'};
+      if(where==='taxi') return {type:'적립',rate:null,amt:5000,note:'교통 10만↑ 시 5,000머니 (하나머니)'};
+      if(where==='academy') return {type:'적립',rate:null,amt:20000,note:'학원비 40만 결제 시 20,000머니 (30만 구간)'};
+      if(where==='mart') return {type:'할인',rate:null,amt:Math.min(Math.floor(amt/10000)*1000,5000),note:'롯데슈퍼·이마트에브리데이·홈플러스익스프레스·GS슈퍼 1만원↑ → 1,000원 청구할인 (월 최대 5,000원)'};
+      return null;
+    }
+  },
+  {
+    id:'kb_asiana', name:'KB아시아나 올림카드', issuer:'KB국민카드 · 연회비 28,000원', fee:28000, min:0,
+    kws:['해외','해외결제','해외여행','면세점','면세','해외쇼핑','달러','유로','외화'],
+    ben:()=>({val:'3마일/1,500원',c:'#7c3aed',note:'해외 결제 1,500원당 아시아나 3마일',ok:'무실적 ✅',warn:'국세·지방세 마일 제외'}),
+    rank:(q)=>['해외','면세','달러','유로','외화'].some(k=>q.includes(k))?1:5,
+    calc(amt, where){
+      if(where==='overseas'){
+        const miles = Math.floor(amt/1500*3);
+        return {type:'마일',rate:3/1500,rateLabel:'3마일/1,500원',miles,cash:Math.round(miles*15),note:'해외 1,500원당 아시아나 3마일 · 무실적'};
+      }
+      if(where==='duty_free'){
+        const miles = Math.floor(amt/1500*3);
+        return {type:'마일',rate:3/1500,rateLabel:'3마일/1,500원',miles,cash:Math.round(miles*15),note:'면세점 1,500원당 아시아나 3마일 · 무실적'};
+      }
+      return null;
+    }
+  },
+  {
+    id:'sc030', name:'SC 대한항공카드 030', issuer:'SC제일은행 · 연회비 30,000원', fee:30000, min:300000,
+    kws:['보험','보험료','실손','식재료','마트','홈플러스','이마트','병원','의원','면세점','면세','놀이공원','에버랜드','롯데월드'],
+    ben(q){
+      if(['면세점','면세'].some(k=>q.includes(k)))
+        return{val:'2마일/1,000원',c:'#0891b2',note:'면세점 1,000원당 KAL 2마일 더블적립',ok:'30만 실적↑',warn:null};
+      if(['에버랜드','롯데월드','놀이공원'].some(k=>q.includes(k)))
+        return{val:'놀이공원 할인',c:'#0891b2',note:'에버랜드·롯데월드 자유이용권 할인',ok:'30만 실적↑',warn:null};
+      return{val:'1마일/1,000원',c:'#0891b2',note:'KAL 마일 1,000원당 1마일 · 면세점 2배',ok:'보험·마트·병원 실적 인정',warn:'공과금·세금 마일 제외'};
+    },
+    rank(q){
+      if(['면세점','면세'].some(k=>q.includes(k)))return 2;
+      if(['에버랜드','롯데월드','놀이공원'].some(k=>q.includes(k)))return 2;
+      if(['보험','식재료','마트','병원'].some(k=>q.includes(k)))return 2;
+      return 4;
+    },
+    calc(amt, where){
+      if(where==='duty_free'){
+        const miles = Math.floor(amt/1000*2);
+        return {type:'마일',rate:0.002,rateLabel:'2마일/1,000원',miles,cash:Math.round(miles*15),note:'면세점 1,000원당 KAL 2마일 더블적립'};
+      }
+      if(where==='park') return {type:'할인',rate:0.30,amt:Math.round(amt*0.30),note:'놀이공원 자유이용권 할인 (30만↑)'};
+      if(where==='hospital'||where==='mart'||where==='general'||where==='insurance'){
+        const miles = Math.floor(amt/1000*1);
+        return {type:'마일',rate:0.001,rateLabel:'1마일/1,000원',miles,cash:Math.round(miles*15),note:'1,000원당 KAL 1마일 (보험·마트 실적 인정)'};
+      }
+      // 공과금·관리비·국세·지방세는 KAL 마일 적립 제외
+      return null;
+    }
+  },
+  {
+    id:'lgu', name:'LGU+ 스카이패스 신한카드', issuer:'신한카드 · 연회비 25,000원', fee:25000, min:300000,
+    kws:['통신비','통신요금','lgu+','유플러스','통신','핸드폰요금','휴대폰요금'],
+    ben:()=>({val:'월 1,100마일',c:'#ec4899',note:'기본 300 + 더블 300 + LGU+ 자체 500마일 (KAL)',ok:'대체 불가 ✅',warn:'통신요금 자동납부 필수'}),
+    rank:(q)=>['통신','lgu','유플러스','통신비','통신요금'].some(k=>q.includes(k))?1:6,
+    calc(amt, where){
+      return null; // 통신비 자동납부 전용 · 일반 결제 혜택 없음
+    }
+  },
+  {
+    id:'cuckoo_woori', name:'쿠쿠 렌탈프리멤버십 우리카드', issuer:'우리카드 · 연회비 12,000원', fee:12000, min:300000,
+    kws:['쿠쿠','렌탈','정수기','공기청정기','cgv','영화','영화관','에버랜드','롯데월드','서울랜드','놀이공원','자유이용권','테마파크','스타벅스','커피빈','투썸','카페','커피'],
+    ben(q){
+      if(['에버랜드','롯데월드','서울랜드','놀이공원','자유이용권','테마파크'].some(k=>q.includes(k)))
+        return{val:'50% 현장할인',c:'#34c759',note:'에버랜드·롯데월드·서울랜드 자유이용권 50% 현장할인',ok:'월 1회·연 6회',warn:'30만 실적↑ 필요'};
+      if(['cgv','영화','영화관'].some(k=>q.includes(k)))
+        return{val:'6,000원↓',c:'#34c759',note:'CGV 12,000원↑ 결제 시 6,000원 청구할인',ok:'월 1회·연 12회',warn:'30만 실적↑ 필요'};
+      if(['스타벅스','커피빈','투썸','카페','커피'].some(k=>q.includes(k)))
+        return{val:'5% 할인',c:'#34c759',note:'스타벅스·커피빈·카페베네·투썸 5% 청구할인',ok:'30만 실적↑',warn:null};
+      return{val:'17,000원↓',c:'#34c759',note:'쿠쿠 렌탈료 17,000원 청구할인 (30만 구간)',ok:'렌탈료 실적 인정',warn:null};
+    },
+    rank(q){
+      if(['에버랜드','롯데월드','서울랜드','놀이공원','자유이용권'].some(k=>q.includes(k)))return 1;
+      if(['cgv','영화'].some(k=>q.includes(k)))return 2;
+      if(q.includes('쿠쿠')||q.includes('렌탈'))return 1;
+      return 5;
+    },
+    calc(amt, where){
+      if(where==='park') return {type:'할인',rate:0.50,amt:Math.round(amt*0.50),note:'놀이공원 자유이용권 50% 현장할인'};
+      if(where==='cgv') return {type:'할인',rate:null,amt:6000,note:'CGV 6,000원 청구할인 (12,000원↑)'};
+      if(where==='twosome'||where==='starbucks') return {type:'할인',rate:0.05,amt:Math.round(amt*0.05),note:'카페 5% 청구할인'};
+      return null;
+    }
+  },
+  {
+    id:'hyundai', name:'현대백화점카드 C&M', issuer:'현대카드 · 연회비 0원 (평생)', fee:0, min:0,
+    kws:['백화점','현대백화점','더현대','현대아울렛','h포인트','현대식품관'],
+    ben:()=>({val:'5% 쿠폰',c:'#6b7280',note:'현대백화점·더현대·현대아울렛 5% 할인쿠폰 + H포인트',ok:'연회비 평생 무료·무실적 ✅',warn:'백화점 전용 카드'}),
+    rank:(q)=>['백화점','현대백화점','더현대','현대아울렛'].some(k=>q.includes(k))?1:7,
+    calc(amt, where){
+      if(where==='dept') return {type:'할인',rate:0.05,amt:Math.round(amt*0.05),note:'현대백화점 5% 할인쿠폰 · 무실적'};
+      return null;
+    }
+  },
+  {
+    id:'lotte_happy', name:'롯데 국민행복카드', issuer:'롯데카드 · 연회비 0원 (미사용)', fee:0, min:300000,
+    kws:['학원','학원비','병원','약국','롯데월드','키자니아','놀이공원','택시','버스','지하철'],
+    ben(q){
+      if(['학원','학원비'].some(k=>q.includes(k)))
+        return{val:'10% 할인',c:'#059669',note:'학원비 10% 청구할인',ok:'관리비 등으로 30만 실적 충족 시',warn:'학원비는 실적 제외'};
+      if(['병원','약국'].some(k=>q.includes(k)))
+        return{val:'5% 할인',c:'#059669',note:'병원·약국·산후조리원 5% 청구할인',ok:'30만 실적↑',warn:'정부지원금 제외'};
+      if(['롯데월드','키자니아','놀이공원'].some(k=>q.includes(k)))
+        return{val:'10% 할인',c:'#059669',note:'유원지·놀이시설 10% 청구할인',ok:'30만 실적↑',warn:null};
+      return{val:'10% 할인',c:'#059669',note:'택시·버스·지하철 10% 청구할인',ok:'30만 실적↑',warn:null};
+    },
+    rank(q){
+      if(['학원','학원비'].some(k=>q.includes(k)))return 3;
+      if(['병원','약국'].some(k=>q.includes(k)))return 3;
+      return 6;
+    },
+    calc(amt, where){
+      if(where==='hospital') return {type:'할인',rate:0.05,amt:Math.round(amt*0.05),note:'병원·약국 5% 청구할인 (30만 실적↑)'};
+      if(where==='academy') return {type:'할인',rate:0.10,amt:Math.min(Math.round(amt*0.10),10000),note:'학원비 10% 청구할인 · 최대 1만원 (30만 실적↑)'};
+      if(where==='park') return {type:'할인',rate:0.10,amt:Math.round(amt*0.10),note:'유원지·놀이시설 10% 청구할인 (30만 실적↑)'};
+      if(where==='taxi') return {type:'할인',rate:0.10,amt:Math.round(amt*0.10),note:'택시·버스·지하철 10% 청구할인 (30만 실적↑)'};
+      // 공과금·관리비·보험·국세는 실적 제외 → 혜택 없음
+      return null;
+    }
+  }
+];
+
+const MILE_VALUE = 15; // 마일당 현금 가치 (원)
+
+// ══ 검색 탭 로직 ════════════════════════════════════════════════
+const norm = s => s.toLowerCase().replace(/\s+/g,'');
+
+function getMatches(raw){
+  const q = norm(raw);
+  const res=[];
+  CARDS.forEach(c=>{
+    if(c.kws.some(k=>q.includes(norm(k))||norm(k).includes(q))){
+      res.push({c, r:c.rank(q)});
+    }
+  });
+  if(!res.length) return [{c:CARDS[1],r:1},{c:CARDS[2],r:2}];
+  return res.sort((a,b)=>a.r-b.r).slice(0,4);
+}
+
+function render(raw, matches){
+  const isGeneric = !matches.some(m=>m.r<=2);
+  let html = `<div class="result-head">"${raw}" 추천 카드</div>`;
+  matches.forEach(({c,r},i)=>{
+    const b = c.ben(norm(raw));
+    const best = i===0?'best':'';
+    const dc = ['d1','d2','d3','d4'][i]||'d4';
+    html += `
+    <div class="card-item ${best}" style="animation-delay:${i*.05}s">
+      <div class="card-top">
+        <div class="dot ${dc}"></div>
+        <div class="card-info">
+          <div class="card-name">${c.name}</div>
+          <div class="card-sub">${c.issuer}</div>
+        </div>
+        <div class="ben-val" style="color:${b.c}">${b.val}</div>
+      </div>
+      <div class="card-body">
+        <div class="ben-note">${b.note}</div>
+        <div class="ben-tags">
+          ${b.ok?`<span class="btag bt-green">${b.ok}</span>`:''}
+          ${b.warn?`<span class="btag bt-red">⚠ ${b.warn}</span>`:''}
+          ${c.min===0?`<span class="btag bt-blue">무실적</span>`:`<span class="btag bt-gray">전월 ${c.min/10000}만↑</span>`}
+        </div>
+      </div>
+    </div>`;
+  });
+  if(isGeneric) html+=`<div style="text-align:center;padding:10px 0;font-size:12px;color:var(--sub)">특화 카드 없음 → 신한 Air 1.5로 1.5마일 추천</div>`;
+  document.getElementById('search-body').innerHTML = html;
+}
+
+function go(){
+  const raw = document.getElementById('inp').value.trim();
+  if(!raw) return;
+  document.querySelectorAll('.qtag').forEach(t=>t.classList.remove('on'));
+  document.getElementById('search-body').innerHTML=`<div class="spin-wrap"><div class="spinner"></div>찾는 중...</div>`;
+  setTimeout(()=>render(raw, getMatches(raw)), 180);
+}
+
+function q(val){
+  document.getElementById('inp').value = val;
+  document.querySelectorAll('.qtag').forEach(t=>{
+    t.classList.toggle('on', t.textContent.replace(/[^\w가-힣]/g,'').trim()===val.replace(/[^\w가-힣]/g,'').trim());
+  });
+  go();
+}
+
+document.getElementById('inp').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){e.preventDefault();go();}
+});
+
+// ══ 시뮬레이터 로직 ═════════════════════════════════════════════
+function updateDisplay(){
+  const v = parseInt(document.getElementById('sim-amount').value)||0;
+  document.getElementById('amt-display').textContent = v.toLocaleString();
+}
+function setAmt(v){
+  document.getElementById('sim-amount').value = v;
+  updateDisplay();
+}
+
+function runSim(){
+  const amt = parseInt(document.getElementById('sim-amount').value)||0;
+  const where = document.getElementById('sim-where').value;
+  if(amt<=0){
+    document.getElementById('sim-result-wrap').innerHTML=`<div class="sim-empty">금액을 입력해주세요</div>`;
+    return;
+  }
+
+  const PLACE_LABEL = {
+    general:'일반 가맹점', hospital:'병원·약국', academy:'학원·교육',
+    overseas:'해외 결제', tax:'국세·지방세', utility:'공과금·관리비',
+    insurance:'보험료',
+    coupang:'쿠팡', oliveyoung:'올리브영', twosome:'투썸·뚜레쥬르',
+    vips:'VIPS·CJ레스토랑', cgv:'CGV 영화', park:'놀이공원 자유이용권',
+    taxi:'택시·대중교통', mart:'마트·슈퍼', duty_free:'면세점',
+    dept:'현대백화점', starbucks:'스타벅스·커피빈'
+  };
+
+  // 모든 카드 계산
+  const results = [];
+  CARDS.forEach(card=>{
+    let res = card.calc(amt, where);
+    if(res){
+      let cashVal = 0;
+      if(res.type==='마일') cashVal = res.cash||Math.round((res.miles||0)*MILE_VALUE);
+      else if(res.type==='할인'||res.type==='적립') cashVal = res.amt||0;
+      if(cashVal > 0) results.push({card, res, cashVal});
+    }
+  });
+
+  // 높은 순 정렬
+  results.sort((a,b)=>b.cashVal-a.cashVal);
+
+  const rankEmoji = ['🥇','🥈','🥉','4️⃣'];
+  let html = `<div class="sim-result-title">${PLACE_LABEL[where]} · ${amt.toLocaleString()}원 결제 시</div>`;
+  html += `<div class="sim-result">`;
+
+  results.forEach(({card, res, cashVal}, i)=>{
+    const isBest = i===0;
+
+    // 할인율 표시: 마일 카드는 "N마일/1,000원" 또는 "N마일/1,500원" 형식
+    let rateStr;
+    if(res.type==='마일'){
+      if(res.rateLabel) rateStr = res.rateLabel;
+      else if(res.rate) rateStr = `${(res.rate*1000).toFixed(1)}마일/1,000원`;
+      else rateStr = '-';
+    } else {
+      rateStr = res.rate ? (res.rate*100).toFixed(1)+'%' : '-';
+    }
+
+    const discountStr = res.type==='마일'
+      ? `${(res.miles||0).toLocaleString()}마일`
+      : `${(res.amt||0).toLocaleString()}원`;
+    const cashStr = `≈ ${cashVal.toLocaleString()}원`;
+
+    html += `
+    <div class="sim-row${isBest?' best-row':''}">
+      <div class="sim-rank">${rankEmoji[i]||''}</div>
+      <div class="sim-info">
+        <div class="sim-card-name">${card.name}</div>
+        <div class="sim-metrics">
+          <div class="sim-metric${isBest?' highlight':''}">
+            <div class="sim-metric-label">${res.type==='마일'?'적립 마일':'할인·적립액'}</div>
+            <div class="sim-metric-val" style="color:${isBest?'#059669':'var(--text)'}">${discountStr}</div>
+          </div>
+          <div class="sim-metric${isBest?' highlight':''}">
+            <div class="sim-metric-label">현금 가치</div>
+            <div class="sim-metric-val" style="color:${isBest?'#059669':'var(--text)'}">${cashStr}</div>
+          </div>
+          <div class="sim-metric">
+            <div class="sim-metric-label">할인율</div>
+            <div class="sim-metric-val" style="font-size:13px">${rateStr}</div>
+          </div>
+          <div class="sim-metric">
+            <div class="sim-metric-label">혜택 유형</div>
+            <div class="sim-metric-val" style="font-size:12px;color:var(--sub)">${res.type}</div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--sub);margin-top:6px">${res.note}</div>
+      </div>
+    </div>`;
+  });
+
+  html += `</div>`;
+  html += `<div style="font-size:11px;color:var(--sub);text-align:center;padding:10px 0">마일 현금가치 기준 15원/마일 적용</div>`;
+  document.getElementById('sim-result-wrap').innerHTML = html;
+  // 스크롤 결과로
+  document.getElementById('sim-result-wrap').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ══ 탭 전환 ══════════════════════════════════════════════════════
+function showTab(name){
+  document.getElementById('tab-search').classList.toggle('hidden', name!=='search');
+  document.getElementById('tab-mycards').classList.toggle('hidden', name!=='mycards');
+  document.getElementById('tab-sim').classList.toggle('hidden', name!=='sim');
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>{
+    b.classList.toggle('on', (i===0&&name==='search')||(i===1&&name==='mycards')||(i===2&&name==='sim'));
+  });
+  if(name==='mycards') renderMyCards();
+}
+
+
+// ══ 내 카드 탭 ══════════════════════════════════════════════════
+const MY_CARDS = [
+  {id:'shinhan_air', name:'아시아나 신한카드 Air 1.5', issuer:'신한카드', fee:45000,
+   color:'#6b8cba', emoji:'✈️', active:true,
+   url:'https://www.shinhancard.com/pconts/html/card/apply/credit/1196718_2203.html',
+   benefits:['1,000원당 1.5마일','국세·공과금 실적+마일','해외 더블적립']},
+  {id:'sc_kal', name:'SC 대한항공카드 030', issuer:'SC제일은행', fee:30000,
+   color:'#1a3a5c', emoji:'🛫', active:true,
+   url:'https://www.standardchartered.co.kr/np/kr/pm/cr/CardsDetail.jsp?prodId=CD00001668',
+   benefits:['1,000원당 KAL 1마일','면세점 2배','MOVV 3만원']},
+  {id:'coupang_wow', name:'쿠팡 와우카드', issuer:'KB국민카드', fee:20000,
+   color:'#ff5050', emoji:'🛍', active:true,
+   url:'https://card.kbcard.com/SOU/DVIEW/MACDBMCQ11006?maincc_cd=6253',
+   benefits:['쿠팡 4% 쿠팡캐시','일반 1.5% 무실적']},
+  {id:'lgu_skypass', name:'LGU+ 스카이패스 신한카드', issuer:'신한카드', fee:25000,
+   color:'#c00025', emoji:'📱', active:true,
+   url:'https://www.shinhancard.com/pconts/html/card/apply/credit/1196719_2203.html',
+   benefits:['월 1,100마일(KAL)','통신비 연결 필수']},
+  {id:'cuckoo_woori', name:'쿠쿠 렌탈프리멤버십 우리카드', issuer:'우리카드', fee:12000,
+   color:'#00704a', emoji:'🎡', active:true,
+   url:'https://pc.wooricard.com/dcpc/yh1/crd/crdPrdt/H1CRD101M0.do',
+   benefits:['렌탈 17,000원 할인','놀이공원 50% 할인','CGV 6,000원']},
+  {id:'cuckoo_lotte', name:'스페셜 롯데카드 (쿠쿠)', issuer:'롯데카드', fee:12000,
+   color:'#c8001e', emoji:'🏠', active:true,
+   url:'https://www.lottecard.co.kr/app/LPCDCPCA_V100.lc',
+   benefits:['렌탈 16,000원 할인']},
+  {id:'skmagic_lotte', name:'SK매직 스페셜 롯데카드', issuer:'롯데카드', fee:15000,
+   color:'#e8002d', emoji:'⚙️', active:true,
+   url:'https://www.lottecard.co.kr/app/LPCDCPCA_V100.lc',
+   benefits:['구독 13,000원 할인']},
+  {id:'hana_1q', name:'하나멤버스 1Q Living+', issuer:'하나카드', fee:10000,
+   color:'#00b4b4', emoji:'📚', active:true,
+   url:'https://www.hanacard.co.kr/OPP08000000N.web?pcd=HS2002001&mcd=HS2002',
+   benefits:['학원 20,000머니','교통+쇼핑 10,000머니','스타벅스 4,000원','SSM 1,000원']},
+  {id:'lotte_happy', name:'롯데 국민행복카드', issuer:'롯데카드', fee:0,
+   color:'#aaa', emoji:'🏥', active:false,
+   url:'https://www.lottecard.co.kr/app/LPCDCPCA_V100.lc',
+   benefits:['병원 5%','학원 10%','놀이공원 10%']},
+  {id:'kb_asiana', name:'KB아시아나 올림카드', issuer:'KB국민카드', fee:28000,
+   color:'#2c2c2c', emoji:'🌏', active:true,
+   url:'https://card.kbcard.com/SOU/DVIEW/MACDBMCQ11006?maincc_cd=6418',
+   benefits:['해외 1,500원당 3마일','무실적']},
+  {id:'cj_kb', name:'The CJ KB국민카드', issuer:'KB국민카드', fee:5000,
+   color:'#0052a5', emoji:'💄', active:true,
+   url:'https://card.kbcard.com/SOU/DVIEW/MACDBMCQ11006?maincc_cd=6432',
+   benefits:['올리브영·투썸 10%','VIPS 20%','CGV 6,000원']},
+  {id:'hyundai_cnm', name:'현대백화점카드 C&M', issuer:'현대카드', fee:0,
+   color:'#1a1a1a', emoji:'🏬', active:true,
+   url:'https://www.thehyundaicardmall.com/card/benefit/benefit_list.do',
+   benefits:['백화점 5% 할인쿠폰','H포인트 평생무료']},
+];
+
+function renderMyCards(){
+  const list = document.getElementById('my-card-list');
+  const active = MY_CARDS.filter(c=>c.active);
+  document.getElementById('card-count').textContent = active.length+'장';
+  
+  if(active.length===0){
+    list.innerHTML='<div style="text-align:center;padding:40px;color:var(--sub);font-size:13px;">등록된 카드가 없어요<br>위 검색창에서 카드를 추가해보세요</div>';
+    return;
+  }
+
+  list.innerHTML = active.map(card=>`
+    <div id="wrap_${card.id}" style="background:white;border-radius:16px;margin-bottom:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06);">
+      <div style="padding:13px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;" onclick="if(!event.target.closest('button'))openCard('${card.id}')">
+        <div style="width:44px;height:44px;border-radius:12px;background:${card.color};display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">${card.emoji}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${card.name}</div>
+          <div style="font-size:11px;color:var(--sub);margin-top:2px;">${card.issuer} · 연회비 ${card.fee===0?'무료':card.fee.toLocaleString()+'원'}</div>
+          <div style="font-size:10px;color:var(--teal);margin-top:3px;font-weight:600;">혜택 보기 →</div>
+        </div>
+        <button onclick="event.stopPropagation();confirmToggle('${card.id}')"
+          style="height:28px;padding:0 12px;border-radius:20px;flex-shrink:0;
+          border:1.5px solid #e53935;background:#fff0f0;color:#e53935;
+          font-size:11px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">
+          해지
+        </button>
+      </div>
+      <div id="confirm_${card.id}" style="display:none;margin:0 16px 12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:10px 12px;">
+        <div style="font-size:12px;font-weight:700;color:#c2410c;margin-bottom:5px;">
+          ${['cuckoo_woori','cuckoo_lotte','skmagic_lotte'].includes(card.id)?'⚠️ 렌탈 연결 카드 — 고객센터 확인 후 해지하세요':'정말 해지하시겠어요?'}
+        </div>
+        <div style="font-size:11px;color:#9a3412;margin-bottom:8px;">해지 시 목록에서 삭제되고 시뮬레이터에서도 제외돼요.</div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="doToggle('${card.id}')" style="flex:1;height:32px;background:#e53935;border:none;border-radius:8px;color:white;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">해지 확인</button>
+          <button onclick="cancelToggle('${card.id}')" style="flex:1;height:32px;background:#f5f5f7;border:none;border-radius:8px;color:var(--sub);font-size:12px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;">취소</button>
+        </div>
+      </div>
+      <div style="padding:0 16px 13px;display:flex;flex-wrap:wrap;gap:5px;">
+        ${card.benefits.map(b=>`<span style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:10px;font-weight:600;color:#444;">${b}</span>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function confirmToggle(id){
+  const card = MY_CARDS.find(c=>c.id===id);
+  if(!card) return;
+  if(!card.active){ doToggle(id); return; }
+  const box = document.getElementById('confirm_'+id);
+  if(box) box.style.display = box.style.display==='none'?'block':'none';
+}
+function cancelToggle(id){
+  const box = document.getElementById('confirm_'+id);
+  if(box) box.style.display='none';
+}
+function doToggle(id){
+  const idx = MY_CARDS.findIndex(c=>c.id===id);
+  if(idx!==-1){ MY_CARDS.splice(idx,1); renderMyCards(); }
+}
+
+// Claude API 카드 검색 (웹서치 포함)
+async function searchCard(){
+  const q = document.getElementById('card-search-inp').value.trim();
+  if(!q) return;
+  const box = document.getElementById('card-search-result');
+  box.innerHTML = '<div class="spin-wrap"><div class="spinner"></div>카드 정보 검색 중...</div>';
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514', max_tokens:800,
+        tools:[{type:'web_search_20250305', name:'web_search'}],
+        system:`당신은 한국 신용카드 전문가입니다. 카드명 일부(예: "대한항공 060", "KB 올림")를 입력해도 웹서치로 정확히 찾아주세요. 아래 JSON만 출력, 다른 텍스트 없이:
+{"name":"정확한 카드 풀네임","issuer":"카드사명","fee":연회비숫자,"color":"카드대표색헥스","emoji":"관련이모지1개","benefits":["핵심혜택1","핵심혜택2","핵심혜택3"],"summary":"한줄요약20자이내"}`,
+        messages:[{role:'user',content:`"${q}" 카드를 웹서치해서 정확한 정보(카드명, 연회비, 주요혜택)를 찾아줘`}]
+      })
+    });
+    const data = await res.json();
+    const text = (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    const m = text.match(/\{[\s\S]*?\}/);
+    if(!m) throw new Error('파싱실패');
+    const info = JSON.parse(m[0]);
+    const already = MY_CARDS.find(c=>c.name===info.name||c.name.includes(info.name.slice(0,6)));
+    box.innerHTML = `
+    <div style="border:1.5px solid #b2f0e8;border-radius:12px;padding:14px;background:#e6f9f6;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+        <div style="width:44px;height:44px;border-radius:12px;background:${info.color||'#64748b'};display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">${info.emoji||'💳'}</div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--text);">${info.name}</div>
+          <div style="font-size:11px;color:var(--sub);margin-top:2px;">${info.issuer} · 연회비 ${info.fee===0?'무료':(info.fee||0).toLocaleString()+'원'}</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:#444;line-height:1.6;margin-bottom:10px;">${info.summary||''}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;">
+        ${(info.benefits||[]).map(b=>`<span style="background:white;border:1px solid #b2f0e8;border-radius:6px;padding:3px 8px;font-size:10px;font-weight:600;color:#00897b;">${b}</span>`).join('')}
+      </div>
+      ${already
+        ? '<div style="text-align:center;padding:8px;font-size:12px;color:var(--sub);font-weight:600;">이미 등록된 카드예요 ✅</div>'
+        : '<button onclick="addCard(' + JSON.stringify(info).replace(/"/g,"'") + ')" style="width:100%;height:42px;background:var(--teal);border:none;border-radius:10px;font-size:14px;font-weight:700;color:white;cursor:pointer;font-family:Noto Sans KR,sans-serif;">+ 내 카드에 추가</button>'
+      }
+    </div>`;
+  } catch(e){
+    box.innerHTML = '<div style="text-align:center;padding:14px;font-size:12px;color:#e53935;font-weight:600;">검색 실패 · 더 구체적으로 입력해보세요<br><span style=\"font-size:11px;color:var(--sub);font-weight:400;\">예: 현대카드 대한항공 060, KB 아시아나 올림</span></div>';
+  }
+}
+
+function openCard(id){
+  const card = MY_CARDS.find(c=>c.id===id);
+  if(card && card.url) window.open(card.url, '_blank');
+}
+
+function addCard(info){
+  MY_CARDS.push({id:'custom_'+Date.now(), name:info.name, issuer:info.issuer,
+    fee:info.fee||0, color:info.color||'#64748b', emoji:info.emoji||'💳',
+    active:true, benefits:info.benefits||[]});
+  document.getElementById('card-search-inp').value='';
+  document.getElementById('card-search-result').innerHTML='';
+  renderMyCards();
+}
+
+document.getElementById('card-search-inp').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){e.preventDefault();searchCard();}
+});
+
+if(window.navigator.standalone) document.getElementById('hint').style.display='none';
+</script>
+</body>
+</html>
